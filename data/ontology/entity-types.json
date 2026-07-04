@@ -1,0 +1,14 @@
+{
+  "Material": { "desc": "Материалы и вещества", "props": ["name", "formula", "aliases", "category"] },
+  "Process": { "desc": "Технологические процессы", "props": ["name", "aliases", "domain"] },
+  "Equipment": { "desc": "Оборудование и установки", "props": ["name", "aliases", "type"] },
+  "Property": { "desc": "Измеряемое свойство/параметр", "props": ["name", "unit", "dimension"] },
+  "Condition": { "desc": "Условие/числовое ограничение", "props": ["param", "op", "value", "value2", "unit"] },
+  "Experiment": { "desc": "Опыт/протокол", "props": ["id", "title", "date", "material", "regime", "result_summary"] },
+  "Publication": { "desc": "Статья/отчёт/патент/диссертация", "props": ["id", "title", "type", "year", "lang", "doi", "source_ref"] },
+  "Expert": { "desc": "Автор/носитель компетенции", "props": ["name", "affiliation", "domains"] },
+  "Facility": { "desc": "Лаборатория/установка/предприятие", "props": ["name", "org", "location"] },
+  "Finding": { "desc": "Вывод/рекомендация", "props": ["id", "statement", "effect", "applicability", "limitations", "confidence", "evidence_count"] },
+  "GeoContext": { "desc": "Географическая привязка", "props": ["country", "region", "scope"] },
+  "EconomicIndicator": { "desc": "Технико-экономический показатель", "props": ["name", "value", "unit", "capex_opex"] }
+}

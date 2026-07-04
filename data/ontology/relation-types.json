@@ -1,0 +1,18 @@
+{
+  "USES_MATERIAL": { "from": "Process", "to": "Material", "desc": "процесс использует материал" },
+  "APPLIED_FOR": { "from": "Process", "to": "Material", "desc": "метод применяется для задачи/материала" },
+  "OPERATES_AT_CONDITION": { "from": "Process|Experiment", "to": "Condition", "desc": "работает при условии/ограничении" },
+  "HAS_PROPERTY": { "from": "Material|Process", "to": "Property", "desc": "обладает свойством" },
+  "PRODUCES_OUTPUT": { "from": "Process|Experiment", "to": "Material|Finding", "desc": "даёт результат/эффект" },
+  "USES_EQUIPMENT": { "from": "Process", "to": "Equipment", "desc": "реализуется на оборудовании" },
+  "SHOWED": { "from": "Experiment", "to": "Finding", "desc": "эксперимент показал вывод" },
+  "DESCRIBED_IN": { "from": "*", "to": "Publication", "desc": "сущность описана в источнике" },
+  "VALIDATED_BY": { "from": "Finding", "to": "Publication|Experiment", "desc": "вывод подтверждён источником" },
+  "CONTRADICTS": { "from": "Finding", "to": "Finding", "desc": "противоречие выводов" },
+  "SUPERSEDES": { "from": "Finding", "to": "Finding", "desc": "новый вывод заменяет устаревший" },
+  "EXPERT_IN": { "from": "Expert", "to": "Process|Material", "desc": "эксперт в области" },
+  "CONDUCTED_AT": { "from": "Experiment", "to": "Facility", "desc": "эксперимент проведён на площадке" },
+  "AUTHORED": { "from": "Expert", "to": "Publication", "desc": "авторство" },
+  "HAS_GEO": { "from": "Publication|Experiment|Facility", "to": "GeoContext", "desc": "географическая привязка" },
+  "HAS_ECONOMICS": { "from": "Process|Finding", "to": "EconomicIndicator", "desc": "технико-экономический показатель" }
+}

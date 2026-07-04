@@ -1,0 +1,22 @@
+{
+  "электроэкстракция": ["electrowinning", "ЭЭ", "электровыделение", "electro-winning"],
+  "печь взвешенной плавки": ["ПВП", "fluidized bed furnace", "flash smelting furnace", "ПВ"],
+  "выщелачивание": ["leaching", "кучное выщелачивание", "heap leaching"],
+  "католит": ["catholyte"],
+  "анолит": ["anolyte"],
+  "штейн": ["matte", "медный штейн", "никелевый штейн", "copper matte", "nickel matte"],
+  "шлак": ["slag"],
+  "обессоливание": ["desalination", "деминерализация", "demineralization"],
+  "обратный осмос": ["reverse osmosis", "RO", "ОО"],
+  "нанофильтрация": ["nanofiltration", "NF"],
+  "техногенный гипс": ["phosphogypsum", "фосфогипс", "technogenic gypsum"],
+  "диафрагменная ячейка": ["diaphragm cell", "мембранная ячейка"],
+  "МПГ": ["металлы платиновой группы", "PGM", "platinum group metals"],
+  "золото": ["Au", "gold"],
+  "серебро": ["Ag", "silver"],
+  "никель": ["Ni", "nickel"],
+  "медь": ["Cu", "copper"],
+  "сульфаты": ["sulfates", "SO4", "сульфат-ион"],
+  "хлориды": ["chlorides", "Cl", "хлорид-ион"],
+  "шахтные воды": ["mine water", "рудничные воды", "mine drainage"]
+}

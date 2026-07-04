@@ -1,0 +1,589 @@
+<!doctype html>
+<html lang="ru"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Nornicel R&D — Карта знаний (макет)</title></head><body>
+<style>
+  :root{
+    --ink:#141E28; --ink-2:#1C2A38; --ink-3:#26394B;
+    --ground:#EEF2F7; --surface:#FFFFFF; --line:#D5DEE8; --line-2:#E4EAF1;
+    --text:#1B2530; --slate:#54657A; --slate-2:#7C8B9C;
+    --steel:#1F5C8B; --steel-2:#2E79AE; --steel-wash:#EAF1F8;
+    --copper:#A96A38;
+    --ok:#2E7D53; --ok-wash:#E7F2EC;
+    --warn:#B0770C; --warn-wash:#F7EEDD;
+    --risk:#B23A2E; --risk-wash:#F7E7E4;
+    --display:'Bahnschrift','Franklin Gothic Medium','Arial Narrow',system-ui,sans-serif;
+    --body:'Segoe UI',system-ui,-apple-system,Roboto,'Helvetica Neue',sans-serif;
+    --data:'Consolas','Cascadia Mono',ui-monospace,monospace;
+    --r:6px; --r-lg:10px;
+  }
+  *{box-sizing:border-box;}
+  .kg{
+    font-family:var(--body); color:var(--text); background:var(--ground);
+    line-height:1.5; -webkit-font-smoothing:antialiased;
+    display:grid; grid-template-columns:72px 1fr; min-height:100vh;
+  }
+  .kg :focus-visible{outline:2px solid var(--steel-2); outline-offset:2px; border-radius:3px;}
+  @media (prefers-reduced-motion:reduce){ .kg *{transition:none !important; animation:none !important;} }
+
+  /* ---------- Nav rail ---------- */
+  .rail{
+    background:var(--ink); color:#AEBECD; display:flex; flex-direction:column;
+    align-items:center; gap:4px; padding:14px 0; position:sticky; top:0; height:100vh;
+  }
+  .rail .brand{
+    width:40px; height:40px; border-radius:9px; margin-bottom:14px;
+    background:linear-gradient(150deg,var(--steel-2),var(--steel) 60%,var(--copper));
+    display:grid; place-items:center; color:#fff; font-family:var(--display);
+    font-weight:700; font-size:20px; letter-spacing:.02em;
+  }
+  .rail button{
+    width:44px; height:44px; border:0; background:transparent; color:inherit;
+    border-radius:9px; cursor:pointer; display:grid; place-items:center;
+    transition:background .15s,color .15s; position:relative;
+  }
+  .rail button svg{width:21px; height:21px; stroke-width:1.7;}
+  .rail button:hover{background:var(--ink-3); color:#fff;}
+  .rail button.on{background:var(--ink-3); color:#fff;}
+  .rail button.on::before{
+    content:""; position:absolute; left:-14px; top:9px; bottom:9px; width:3px;
+    border-radius:0 3px 3px 0; background:var(--steel-2);
+  }
+  .rail .sp{flex:1;}
+
+  /* ---------- Work area ---------- */
+  .work{display:flex; flex-direction:column; min-width:0;}
+  .topbar{
+    background:var(--surface); border-bottom:1px solid var(--line);
+    padding:14px 26px; display:flex; align-items:center; gap:20px; position:sticky; top:0; z-index:5;
+  }
+  .wordmark{display:flex; flex-direction:column; gap:1px; flex-shrink:0;}
+  .wordmark b{
+    font-family:var(--display); font-weight:700; font-size:18px; letter-spacing:.04em;
+    color:var(--ink); text-transform:uppercase; line-height:1;
+  }
+  .wordmark span{font-size:11px; color:var(--slate-2); letter-spacing:.03em;}
+  .search{
+    flex:1; display:flex; align-items:center; gap:10px; background:var(--ground);
+    border:1px solid var(--line); border-radius:var(--r-lg); padding:10px 14px; min-width:0;
+    transition:border-color .15s,box-shadow .15s;
+  }
+  .search:focus-within{border-color:var(--steel-2); box-shadow:0 0 0 3px var(--steel-wash);}
+  .search svg{width:18px; height:18px; color:var(--slate); flex-shrink:0;}
+  .search input{
+    flex:1; border:0; background:transparent; font-family:var(--body); font-size:14.5px;
+    color:var(--text); min-width:0;
+  }
+  .search input:focus{outline:none;}
+  .search kbd{
+    font-family:var(--data); font-size:11px; color:var(--slate); background:var(--surface);
+    border:1px solid var(--line); border-bottom-width:2px; border-radius:4px; padding:2px 6px; flex-shrink:0;
+  }
+  .btn{
+    font-family:var(--body); font-size:13.5px; font-weight:600; border-radius:var(--r);
+    padding:9px 15px; cursor:pointer; border:1px solid transparent; white-space:nowrap;
+    transition:background .15s,border-color .15s;
+  }
+  .btn-primary{background:var(--steel); color:#fff;}
+  .btn-primary:hover{background:var(--steel-2);}
+  .btn-ghost{background:var(--surface); color:var(--text); border-color:var(--line);}
+  .btn-ghost:hover{border-color:var(--slate-2);}
+
+  /* ---------- Tabs ---------- */
+  .tabs{
+    display:flex; gap:2px; padding:0 26px; background:var(--surface);
+    border-bottom:1px solid var(--line);
+  }
+  .tabs button{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.05em; font-size:13px;
+    font-weight:600; color:var(--slate); background:transparent; border:0; cursor:pointer;
+    padding:13px 4px; margin-right:26px; border-bottom:2.5px solid transparent; transition:color .15s;
+  }
+  .tabs button:hover{color:var(--text);}
+  .tabs button.on{color:var(--steel); border-bottom-color:var(--steel);}
+
+  .scroll{padding:22px 26px 40px; overflow-y:auto;}
+  .panel{display:none; animation:rise .25s ease;}
+  .panel.on{display:block;}
+  @keyframes rise{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:none;}}
+
+  /* ---------- Filters ---------- */
+  .filters{display:flex; flex-wrap:wrap; gap:8px; align-items:center; margin-bottom:20px;}
+  .flabel{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.06em; font-size:11px;
+    color:var(--slate-2); margin-right:2px;
+  }
+  .chip{
+    display:inline-flex; align-items:center; gap:6px; font-size:12.5px; padding:5px 11px;
+    border-radius:20px; border:1px solid var(--line); background:var(--surface); color:var(--slate);
+    cursor:pointer; transition:all .15s;
+  }
+  .chip:hover{border-color:var(--steel-2); color:var(--steel);}
+  .chip.on{background:var(--steel-wash); border-color:var(--steel); color:var(--steel); font-weight:600;}
+  .chip .x{color:var(--steel); font-weight:700;}
+  .chip.geo-ru.on{background:var(--ok-wash); border-color:var(--ok); color:var(--ok);}
+
+  /* ---------- Question + summary ---------- */
+  .qcard{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    padding:20px 22px; margin-bottom:18px;
+  }
+  .eyebrow{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.09em; font-size:11px;
+    color:var(--copper); font-weight:600; margin-bottom:8px;
+  }
+  .question{font-size:18px; line-height:1.4; color:var(--ink); text-wrap:balance; font-weight:500;}
+  .summary{
+    display:grid; grid-template-columns:repeat(4,1fr); gap:14px; margin-top:18px;
+    border-top:1px solid var(--line-2); padding-top:16px;
+  }
+  .metric .mv{font-family:var(--display); font-size:26px; font-weight:700; color:var(--ink); font-variant-numeric:tabular-nums; line-height:1;}
+  .metric .ml{font-size:12px; color:var(--slate); margin-top:5px;}
+  .metric .mv.ok{color:var(--ok);} .metric .mv.warn{color:var(--warn);}
+
+  /* ---------- Verdict blocks ---------- */
+  .block{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    margin-bottom:16px; overflow:hidden;
+  }
+  .block > .head{
+    display:flex; align-items:center; gap:10px; padding:13px 18px; border-bottom:1px solid var(--line-2);
+  }
+  .block .head h3{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.05em; font-size:14px;
+    font-weight:700; color:var(--ink); margin:0; flex:1;
+  }
+  .sev{width:4px; align-self:stretch;}
+  .block.ok .sev{background:var(--ok);} .block.warn .sev{background:var(--warn);}
+  .block .head .count{font-size:12px; color:var(--slate); font-family:var(--data);}
+  .block .body{display:flex;}
+  .rows{flex:1;}
+  .mrow{display:flex; align-items:flex-start; gap:14px; padding:14px 18px; border-bottom:1px solid var(--line-2);}
+  .mrow:last-child{border-bottom:0;}
+  .mrow .name{font-weight:600; color:var(--ink); font-size:14.5px; min-width:190px;}
+  .mrow .name small{display:block; font-weight:400; color:var(--slate-2); font-size:12px; margin-top:2px;}
+  .mrow .desc{flex:1; font-size:13.5px; color:var(--slate);}
+  .nums{display:flex; gap:16px; margin-top:7px; flex-wrap:wrap;}
+  .num{font-family:var(--data); font-size:12.5px; color:var(--text); font-variant-numeric:tabular-nums;}
+  .num b{color:var(--steel);}
+  .badges{display:flex; flex-direction:column; gap:6px; align-items:flex-end; min-width:104px;}
+  .pill{
+    display:inline-flex; align-items:center; gap:5px; font-size:11px; font-weight:600;
+    padding:3px 9px; border-radius:20px; letter-spacing:.02em; white-space:nowrap;
+  }
+  .pill.hi{background:var(--ok-wash); color:var(--ok);}
+  .pill.mid{background:var(--warn-wash); color:var(--warn);}
+  .pill.dot::before{content:""; width:6px; height:6px; border-radius:50%; background:currentColor;}
+  .geo{font-family:var(--data); font-size:11px; color:var(--slate); border:1px solid var(--line); border-radius:4px; padding:2px 7px;}
+
+  /* ---------- Sources ---------- */
+  .srcgrid{display:grid; grid-template-columns:repeat(auto-fill,minmax(250px,1fr)); gap:12px;}
+  .src{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r); padding:13px 15px;
+    display:flex; flex-direction:column; gap:8px; transition:border-color .15s,transform .15s;
+  }
+  .src:hover{border-color:var(--steel-2); transform:translateY(-2px);}
+  .src .kind{font-family:var(--display); text-transform:uppercase; letter-spacing:.05em; font-size:10.5px; color:var(--copper); font-weight:600;}
+  .src .ttl{font-size:13.5px; color:var(--ink); font-weight:500; line-height:1.35;}
+  .src .meta{display:flex; gap:8px; align-items:center; flex-wrap:wrap; margin-top:auto; font-size:11.5px; color:var(--slate);}
+  .src .meta .yr{font-family:var(--data); font-variant-numeric:tabular-nums;}
+
+  .sectlabel{
+    font-family:var(--display); text-transform:uppercase; letter-spacing:.07em; font-size:12px;
+    color:var(--slate); font-weight:600; margin:22px 0 12px;
+  }
+  .actions{display:flex; gap:9px; flex-wrap:wrap; margin-top:20px;}
+
+  /* ---------- Graph ---------- */
+  .graphwrap{display:grid; grid-template-columns:1fr 260px; gap:16px;}
+  .canvas{
+    background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg);
+    overflow-x:auto; padding:6px;
+  }
+  .legend{display:flex; flex-wrap:wrap; gap:12px; padding:12px 14px 4px;}
+  .lg{display:inline-flex; align-items:center; gap:6px; font-size:12px; color:var(--slate);}
+  .lg .sw{width:11px; height:11px; border-radius:3px;}
+  .gnode text{font-family:var(--body); fill:var(--text);}
+  .gnode .lab{font-weight:600; font-size:12px;}
+  .gnode .sub{font-size:10px; fill:var(--slate-2); font-family:var(--data);}
+  .gedge{stroke:#B8C6D6; stroke-width:1.6; fill:none;}
+  .gedge.contra{stroke:var(--warn); stroke-width:2; stroke-dasharray:5 4;}
+  .elabel{font-size:10px; fill:var(--slate-2); font-family:var(--data);}
+  .aside{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:16px;}
+  .aside h4{font-family:var(--display); text-transform:uppercase; letter-spacing:.05em; font-size:12px; color:var(--slate); margin:0 0 10px;}
+  .kv{display:flex; justify-content:space-between; gap:10px; padding:7px 0; border-bottom:1px solid var(--line-2); font-size:13px;}
+  .kv:last-child{border-bottom:0;} .kv .k{color:var(--slate);} .kv .v{color:var(--ink); font-weight:600; font-family:var(--data); font-variant-numeric:tabular-nums;}
+  .gap-note{margin-top:14px; background:var(--risk-wash); border:1px solid #E7C5C0; border-radius:var(--r); padding:11px 13px; font-size:12.5px; color:var(--risk);}
+  .gap-note b{font-family:var(--display); text-transform:uppercase; letter-spacing:.04em; font-size:11px; display:block; margin-bottom:3px;}
+  /* interactive graph */
+  .gtoolbar{display:flex; align-items:center; gap:12px; padding:4px 4px 10px;}
+  .gbtn{font-family:var(--body); font-size:12.5px; border:1px solid var(--line); background:var(--surface); color:var(--slate); border-radius:6px; padding:6px 11px; cursor:pointer; transition:border-color .15s,color .15s;}
+  .gbtn:hover{border-color:var(--steel-2); color:var(--steel);}
+  .ghint{font-size:12px; color:var(--slate-2);}
+  #gsvg{display:block; touch-action:none; user-select:none;}
+  .gnode{cursor:grab;}
+  .gnode:active{cursor:grabbing;}
+  .gnode rect{transition:stroke-width .12s, filter .12s;}
+  .gnode.sel rect{stroke-width:2.6; filter:drop-shadow(0 3px 7px rgba(20,30,40,.22));}
+  .gnode.dim{opacity:.32;}
+  .gedge{transition:opacity .12s, stroke .12s, stroke-width .12s;}
+  .gedge.hl{stroke:var(--steel); stroke-width:2.6;}
+  .gedge.dim{opacity:.16;}
+  .elabel.dim{opacity:.16;}
+
+  /* ---------- Dashboard ---------- */
+  .dgrid{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .card{background:var(--surface); border:1px solid var(--line); border-radius:var(--r-lg); padding:18px 20px;}
+  .card h3{font-family:var(--display); text-transform:uppercase; letter-spacing:.05em; font-size:13px; color:var(--ink); margin:0 0 16px; font-weight:700;}
+  .cov{margin-bottom:15px;}
+  .cov:last-child{margin-bottom:0;}
+  .cov .top{display:flex; justify-content:space-between; align-items:baseline; margin-bottom:6px;}
+  .cov .dom{font-size:13.5px; color:var(--ink); font-weight:500;}
+  .cov .val{font-family:var(--data); font-size:12.5px; color:var(--slate); font-variant-numeric:tabular-nums;}
+  .bar{height:8px; background:var(--ground); border-radius:20px; overflow:hidden;}
+  .bar span{display:block; height:100%; border-radius:20px; background:linear-gradient(90deg,var(--steel),var(--steel-2));}
+  .bar.low span{background:linear-gradient(90deg,#C99A3A,var(--warn));}
+  .risk-row{display:flex; align-items:center; gap:12px; padding:12px 0; border-bottom:1px solid var(--line-2);}
+  .risk-row:last-child{border-bottom:0;}
+  .risk-row .rt{flex:1; font-size:13.5px; color:var(--ink);}
+  .risk-row .rt small{display:block; color:var(--slate-2); font-size:11.5px; margin-top:2px;}
+  .spark{width:78px; height:26px; flex-shrink:0;}
+  .tag{font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; white-space:nowrap;}
+  .tag.crit{background:var(--risk-wash); color:var(--risk);}
+  .tag.warn{background:var(--warn-wash); color:var(--warn);}
+  .foot{margin-top:26px; padding-top:14px; border-top:1px solid var(--line); font-size:12px; color:var(--slate-2); display:flex; justify-content:space-between; flex-wrap:wrap; gap:8px;}
+  @media (max-width:820px){
+    .kg{grid-template-columns:56px 1fr;}
+    .summary{grid-template-columns:repeat(2,1fr);}
+    .graphwrap,.dgrid{grid-template-columns:1fr;}
+    .mrow{flex-wrap:wrap;} .mrow .name{min-width:100%;} .badges{flex-direction:row; align-items:center;}
+  }
+</style>
+
+<div class="kg">
+  <!-- ================= NAV RAIL ================= -->
+  <aside class="rail">
+    <div class="brand">N</div>
+    <button class="on" title="Поиск" aria-label="Поиск">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+    </button>
+    <button title="Граф знаний" aria-label="Граф знаний">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><circle cx="5" cy="6" r="2.4"/><circle cx="19" cy="6" r="2.4"/><circle cx="12" cy="18" r="2.4"/><path d="M7 7 10.5 16M17 7 13.5 16M7 6h10"/></svg>
+    </button>
+    <button title="Дашборд" aria-label="Дашборд">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 20V10M9 20V4M14 20v-7M19 20V8"/></svg>
+    </button>
+    <button title="Источники" aria-label="Источники">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M4 5.5A2 2 0 0 1 6 4h6l2 2h4a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2z"/></svg>
+    </button>
+    <div class="sp"></div>
+    <button title="Аудит и доступ" aria-label="Аудит и доступ">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><path d="M12 3 5 6v5c0 4.5 3 8 7 10 4-2 7-5.5 7-10V6z"/></svg>
+    </button>
+  </aside>
+
+  <!-- ================= WORK ================= -->
+  <div class="work">
+    <header class="topbar">
+      <div class="wordmark"><b>Nornicel&nbsp;KG</b><span>Карта знаний R&amp;D</span></div>
+      <label class="search">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m21 21-4.3-4.3"/></svg>
+        <input value="методы обессоливания воды: сульфаты/хлориды 200–300 мг/л, сухой остаток ≤ 1000 мг/дм³" aria-label="Запрос на естественном языке"/>
+        <kbd>Enter</kbd>
+      </label>
+      <button class="btn btn-primary">Найти</button>
+    </header>
+
+    <nav class="tabs">
+      <button class="on" data-tab="search">Поиск и ответ</button>
+      <button data-tab="graph">Граф знаний</button>
+      <button data-tab="dash">Дашборд</button>
+    </nav>
+
+    <div class="scroll">
+      <!-- ---------- TAB: SEARCH ---------- -->
+      <section class="panel on" id="p-search">
+        <div class="filters">
+          <span class="flabel">Фильтры</span>
+          <button class="chip on">Материал: вода <span class="x">×</span></button>
+          <button class="chip on">Процесс: обессоливание <span class="x">×</span></button>
+          <button class="chip geo-ru on">География: Россия <span class="x">×</span></button>
+          <button class="chip">+ Мировая практика</button>
+          <button class="chip on">Годы: 2019–2024 <span class="x">×</span></button>
+          <button class="chip on">Достоверность: высокая+ <span class="x">×</span></button>
+        </div>
+
+        <div class="qcard">
+          <div class="eyebrow">Запрос → синтез ответа</div>
+          <div class="question">Какие методы обессоливания воды подходят, если исходная вода содержит сульфаты, хлориды, Ca, Mg, Na по 200–300&nbsp;мг/л, а требуемый сухой остаток — ≤&nbsp;1000&nbsp;мг/дм³?</div>
+          <div class="summary">
+            <div class="metric"><div class="mv">14</div><div class="ml">источников</div></div>
+            <div class="metric"><div class="mv ok">Высокий</div><div class="ml">уровень достоверности</div></div>
+            <div class="metric"><div class="mv">3</div><div class="ml">метода в консенсусе</div></div>
+            <div class="metric"><div class="mv warn">1</div><div class="ml">зона разногласий</div></div>
+          </div>
+        </div>
+
+        <div class="block ok">
+          <div class="head"><span class="sev"></span><h3>Консенсус — применимые методы</h3><span class="count">12 из 14 источников</span></div>
+          <div class="body"><div class="rows">
+            <div class="mrow">
+              <div class="name">Обратный осмос (RO)<small>обратноосмотическое обессоливание</small></div>
+              <div class="desc">Наиболее универсальный метод при данной минерализации. Стабильно даёт сухой остаток ниже целевого.
+                <div class="nums"><span class="num">Сухой остаток после: <b>80–150 мг/дм³</b></span><span class="num">Удаление SO₄²⁻: <b>97–99 %</b></span></div>
+              </div>
+              <div class="badges"><span class="pill hi dot">Высокая</span><span class="geo">8 ист.</span></div>
+            </div>
+            <div class="mrow">
+              <div class="name">Нанофильтрация (NF)<small>для смягчения и снижения сульфатов</small></div>
+              <div class="desc">Эффективна для многозарядных ионов (SO₄²⁻, Ca²⁺, Mg²⁺). Экономичнее RO по энергозатратам.
+                <div class="nums"><span class="num">Удаление SO₄²⁻: <b>90–98 %</b></span><span class="num">Удаление Cl⁻: <b>20–50 %</b></span></div>
+              </div>
+              <div class="badges"><span class="pill hi dot">Высокая</span><span class="geo">6 ист.</span></div>
+            </div>
+            <div class="mrow">
+              <div class="name">Ионный обмен<small>доочистка / умягчение</small></div>
+              <div class="desc">Подходит как ступень доочистки; при данной концентрации самостоятельно — с высоким расходом реагентов.
+                <div class="nums"><span class="num">Целевой сухой остаток: <b>≤ 1000 мг/дм³</b></span><span class="num">Роль: <b>доочистка</b></span></div>
+              </div>
+              <div class="badges"><span class="pill mid dot">Средняя</span><span class="geo">4 ист.</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="block warn">
+          <div class="head"><span class="sev"></span><h3>Зона разногласий</h3><span class="count">2 источника расходятся</span></div>
+          <div class="body"><div class="rows">
+            <div class="mrow">
+              <div class="name">Целесообразность NF без RO<small>при сухом остатке у верхней границы</small></div>
+              <div class="desc">Отчёт ГМК (2021) считает NF достаточной для достижения ≤ 1000 мг/дм³; зарубежная работа (2020) настаивает на связке NF→RO из-за проскока Cl⁻. Требуется пилот на реальной воде.</div>
+              <div class="badges"><span class="pill mid dot">Спорно</span><span class="geo">РФ ↔ Мир</span></div>
+            </div>
+          </div></div>
+        </div>
+
+        <div class="sectlabel">Источники — 14 (Россия: 9 · Мировая практика: 5)</div>
+        <div class="srcgrid">
+          <div class="src"><span class="kind">Отчёт НИИ</span><span class="ttl">Обессоливание оборотных вод обогатительной фабрики: пилотные испытания RO</span><div class="meta"><span class="yr">2023</span><span class="geo">РФ</span><span class="pill hi dot">Высокая</span></div></div>
+          <div class="src"><span class="kind">Статья</span><span class="ttl">Nanofiltration for sulfate removal in mine-affected water</span><div class="meta"><span class="yr">2020</span><span class="geo">Мир</span><span class="pill hi dot">Высокая</span></div></div>
+          <div class="src"><span class="kind">Патент</span><span class="ttl">Способ двухступенчатой очистки NF→RO с рекуперацией давления</span><div class="meta"><span class="yr">2021</span><span class="geo">РФ</span><span class="pill mid dot">Средняя</span></div></div>
+          <div class="src"><span class="kind">Диссертация</span><span class="ttl">Ионообменное умягчение вод с высоким содержанием Ca/Mg</span><div class="meta"><span class="yr">2019</span><span class="geo">РФ</span><span class="pill mid dot">Средняя</span></div></div>
+        </div>
+
+        <div class="actions">
+          <button class="btn btn-primary">Показать в графе</button>
+          <button class="btn btn-ghost">Экспорт PDF</button>
+          <button class="btn btn-ghost">Экспорт Markdown</button>
+          <button class="btn btn-ghost">Экспорт JSON-LD</button>
+          <button class="btn btn-ghost">Похожие кейсы и эксперты</button>
+        </div>
+      </section>
+
+      <!-- ---------- TAB: GRAPH ---------- -->
+      <section class="panel" id="p-graph">
+        <div class="graphwrap">
+          <div>
+            <div class="gtoolbar">
+              <button class="gbtn" id="g-reset">Сбросить раскладку</button>
+              <span class="ghint">Клик по узлу — детали справа · тяните узлы мышью · наведите — подсветка связей</span>
+            </div>
+            <div class="canvas">
+              <svg id="gsvg" viewBox="0 0 640 400" width="100%" role="application" aria-label="Интерактивный граф знаний"></svg>
+            </div>
+            <div class="legend">
+              <span class="lg"><span class="sw" style="background:#EAF1F8;border:1px solid #1F5C8B"></span>Материал</span>
+              <span class="lg"><span class="sw" style="background:#fff;border:1px solid #A96A38"></span>Процесс</span>
+              <span class="lg"><span class="sw" style="background:#EEF2F7;border:1px solid #54657A"></span>Оборудование</span>
+              <span class="lg"><span class="sw" style="background:#F7EEDD;border:1px solid #B0770C"></span>Условие</span>
+              <span class="lg"><span class="sw" style="background:#E7F2EC;border:1px solid #2E7D53"></span>Вывод</span>
+              <span class="lg"><span class="sw" style="background:var(--warn)"></span>Противоречие</span>
+            </div>
+          </div>
+          <div>
+            <div class="aside">
+              <h4 id="g-title">Выберите узел</h4>
+              <div id="g-body"><div class="ghint">Кликните любой узел графа — покажу его тип, свойства, число источников и пробелы в знаниях.</div></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ---------- TAB: DASHBOARD ---------- -->
+      <section class="panel" id="p-dash">
+        <div class="dgrid">
+          <div class="card">
+            <h3>Покрытие знаний по доменам</h3>
+            <div class="cov"><div class="top"><span class="dom">Гидрометаллургия</span><span class="val">312 источн. · 84%</span></div><div class="bar"><span style="width:84%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Пирометаллургия</span><span class="val">248 источн. · 71%</span></div><div class="bar"><span style="width:71%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Экология и водоподготовка</span><span class="val">176 источн. · 58%</span></div><div class="bar"><span style="width:58%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Переработка отходов</span><span class="val">54 источн. · 29%</span></div><div class="bar low"><span style="width:29%"></span></div></div>
+          </div>
+
+          <div class="card">
+            <h3>Зоны риска</h3>
+            <div class="risk-row">
+              <div class="rt">Кучное выщелачивание в холодном климате<small>2 источника · нет экспериментов по выходу металла</small></div>
+              <svg class="spark" viewBox="0 0 78 26"><polyline fill="none" stroke="#B23A2E" stroke-width="1.8" points="0,20 13,18 26,21 39,17 52,19 65,22 78,20"/></svg>
+              <span class="tag crit">пробел</span>
+            </div>
+            <div class="risk-row">
+              <div class="rt">Оптимальная скорость циркуляции католита<small>противоречие: 0.1 vs 0.3 м/с</small></div>
+              <svg class="spark" viewBox="0 0 78 26"><polyline fill="none" stroke="#B0770C" stroke-width="1.8" points="0,8 13,14 26,7 39,16 52,9 65,15 78,10"/></svg>
+              <span class="tag warn">разногласие</span>
+            </div>
+            <div class="risk-row">
+              <div class="rt">Закачка шахтных вод в глубокие горизонты<small>мало ТЭП по зарубежной практике</small></div>
+              <svg class="spark" viewBox="0 0 78 26"><polyline fill="none" stroke="#B0770C" stroke-width="1.8" points="0,18 13,16 26,15 39,13 52,14 65,11 78,9"/></svg>
+              <span class="tag warn">низкое покрытие</span>
+            </div>
+          </div>
+
+          <div class="card">
+            <h3>Активность направлений</h3>
+            <div class="cov"><div class="top"><span class="dom">Новые публикации за 30 дней</span><span class="val">+37</span></div><div class="bar"><span style="width:62%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Эксперименты в работе</span><span class="val">18</span></div><div class="bar"><span style="width:45%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Верифицировано экспертами</span><span class="val">92%</span></div><div class="bar"><span style="width:92%"></span></div></div>
+          </div>
+
+          <div class="card">
+            <h3>Отечественная vs мировая практика</h3>
+            <div class="cov"><div class="top"><span class="dom">Обессоливание воды</span><span class="val">РФ 9 · Мир 5</span></div><div class="bar"><span style="width:64%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Электроэкстракция Ni</span><span class="val">РФ 21 · Мир 34</span></div><div class="bar"><span style="width:38%"></span></div></div>
+            <div class="cov"><div class="top"><span class="dom">Au/Ag/МПГ: штейн↔шлак</span><span class="val">РФ 15 · Мир 12</span></div><div class="bar"><span style="width:56%"></span></div></div>
+          </div>
+        </div>
+      </section>
+
+      <div class="foot">
+        <span>Nornicel R&amp;D Knowledge Graph — макет интерфейса</span>
+        <span>Граф: Neo4j · Backend: Django + DRF · LLM: YandexGPT</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  (function(){
+    var tabs = document.querySelectorAll('.tabs button');
+    var panels = {search:'p-search', graph:'p-graph', dash:'p-dash'};
+    tabs.forEach(function(t){
+      t.addEventListener('click', function(){
+        tabs.forEach(function(x){ x.classList.remove('on'); });
+        t.classList.add('on');
+        Object.values(panels).forEach(function(id){ document.getElementById(id).classList.remove('on'); });
+        document.getElementById(panels[t.dataset.tab]).classList.add('on');
+      });
+    });
+    // rail buttons switch first three views too
+    var rail = document.querySelectorAll('.rail button');
+    var map = ['search','graph','dash'];
+    rail.forEach(function(b,i){
+      if(i>=1 && i<=3){
+        b.addEventListener('click', function(){
+          rail.forEach(function(x){x.classList.remove('on');}); b.classList.add('on');
+          var tab = document.querySelector('.tabs button[data-tab="'+map[i-1]+'"]');
+          if(tab) tab.click();
+        });
+      }
+    });
+  })();
+
+  // === Интерактивный граф знаний ===
+  (function(){
+    var NS='http://www.w3.org/2000/svg';
+    var svg=document.getElementById('gsvg');
+    if(!svg) return;
+    var VW=640, VH=400, W=120, H=44;
+    var TYPE={
+      material:{fill:'#EAF1F8',stroke:'#1F5C8B',tx:'#1B2530'},
+      process:{fill:'#FFFFFF',stroke:'#A96A38',tx:'#1B2530'},
+      equipment:{fill:'#EEF2F7',stroke:'#54657A',tx:'#1B2530'},
+      condition:{fill:'#F7EEDD',stroke:'#B0770C',tx:'#1B2530'},
+      finding:{fill:'#E7F2EC',stroke:'#2E7D53',tx:'#2E7D53'}
+    };
+    var HOME=[
+      {id:'cond',label:'Сухой остаток',sub:'≤ 1000 мг/дм³',type:'condition',x:250,y:14,
+        props:[['Тип','Condition'],['Параметр','dry_residue'],['Ограничение','≤ 1000 мг/дм³']]},
+      {id:'water',label:'Вода',sub:'SO₄ ≤ 300',type:'material',x:20,y:182,
+        props:[['Тип','Material'],['SO₄²⁻','200–300 мг/л'],['Cl⁻','200–300 мг/л'],['Ca/Mg/Na','200–300 мг/л']]},
+      {id:'ro',label:'Обратный осмос',type:'process',x:250,y:96,
+        props:[['Тип','Process'],['Удаление SO₄','97–99 %'],['Сухой остаток','80–150 мг/дм³'],['Источников','8'],['Достоверность','высокая']]},
+      {id:'nf',label:'Нанофильтрация',type:'process',x:250,y:182,
+        props:[['Тип','Process'],['Удаление SO₄','90–98 %'],['Удаление Cl⁻','20–50 %'],['Источников','6'],['Достоверность','высокая']],
+        gap:'Нет экспериментов: холодный климат + NF + оборотная вода фабрики.'},
+      {id:'ie',label:'Ионный обмен',type:'process',x:250,y:268,
+        props:[['Тип','Process'],['Роль','доочистка / умягчение'],['Источников','4'],['Достоверность','средняя']]},
+      {id:'unit',label:'RO-установка',type:'equipment',x:472,y:96,
+        props:[['Тип','Equipment'],['Производительность','100 м³/ч'],['Рекуперация давления','да']]},
+      {id:'finding',label:'Вывод',sub:'остаток ≤ 1000',type:'finding',x:472,y:196,
+        props:[['Тип','Finding'],['Эффект','сухой остаток ≤ 1000 мг/дм³'],['Подтверждений','12 из 14'],['Достоверность','высокая']]}
+    ];
+    var EDGES=[
+      {from:'water',to:'ro',label:'applied_for'},
+      {from:'water',to:'nf',label:'applied_for'},
+      {from:'water',to:'ie',label:'applied_for'},
+      {from:'ro',to:'unit',label:'uses_equipment'},
+      {from:'ro',to:'finding',label:'produces'},
+      {from:'nf',to:'finding',label:'produces'},
+      {from:'ro',to:'cond',label:'operates_at'},
+      {from:'nf',to:'ie',label:'contradicts',kind:'contra'}
+    ];
+    var nodes, byId, edgeEls, labEls, nodeEls, sel=null;
+
+    function elem(name,attrs){var e=document.createElementNS(NS,name);for(var k in attrs)e.setAttribute(k,attrs[k]);return e;}
+    function cx(n){return n.x+W/2;} function cy(n){return n.y+(n.sub?H:40)/2;}
+
+    function build(){
+      while(svg.firstChild) svg.removeChild(svg.firstChild);
+      edgeEls=[]; labEls=[]; nodeEls={};
+      nodes=HOME.map(function(n){return Object.assign({},n);});
+      byId={}; nodes.forEach(function(n){byId[n.id]=n;});
+      EDGES.forEach(function(e){
+        var ln=elem('line',{class:'gedge'+(e.kind==='contra'?' contra':'')}); svg.appendChild(ln); edgeEls.push({e:e,ln:ln});
+        var t=elem('text',{class:'elabel'}); t.textContent=e.label; svg.appendChild(t); labEls.push({e:e,t:t});
+      });
+      nodes.forEach(function(n){
+        var c=TYPE[n.type], h=n.sub?H:40;
+        var g=elem('g',{class:'gnode',tabindex:'0','data-id':n.id});
+        g.appendChild(elem('rect',{width:W,height:h,rx:7,fill:c.fill,stroke:c.stroke}));
+        var lab=elem('text',{class:'lab',x:W/2,y:n.sub?19:24,'text-anchor':'middle',fill:c.tx}); lab.textContent=n.label; g.appendChild(lab);
+        if(n.sub){var s=elem('text',{class:'sub',x:W/2,y:33,'text-anchor':'middle'}); s.textContent=n.sub; g.appendChild(s);}
+        svg.appendChild(g); nodeEls[n.id]=g; wire(g,n);
+      });
+      layout(); select('nf');
+    }
+
+    function layout(){
+      edgeEls.forEach(function(o){var a=byId[o.e.from],b=byId[o.e.to];o.ln.setAttribute('x1',cx(a));o.ln.setAttribute('y1',cy(a));o.ln.setAttribute('x2',cx(b));o.ln.setAttribute('y2',cy(b));});
+      labEls.forEach(function(o){var a=byId[o.e.from],b=byId[o.e.to];o.t.setAttribute('x',(cx(a)+cx(b))/2);o.t.setAttribute('y',(cy(a)+cy(b))/2-4);});
+      nodes.forEach(function(n){nodeEls[n.id].setAttribute('transform','translate('+n.x+','+n.y+')');});
+    }
+
+    function edgeHl(id){edgeEls.forEach(function(o){o.ln.classList.toggle('hl',!!id&&(o.e.from===id||o.e.to===id));});}
+
+    function select(id){
+      sel=id; var n=byId[id];
+      Object.keys(nodeEls).forEach(function(k){nodeEls[k].classList.toggle('sel',k===id);});
+      edgeHl(id);
+      document.getElementById('g-title').textContent='Узел: '+n.label;
+      var html=n.props.map(function(p){return '<div class="kv"><span class="k">'+p[0]+'</span><span class="v">'+p[1]+'</span></div>';}).join('');
+      if(n.gap) html+='<div class="gap-note"><b>Пробел в знаниях</b>'+n.gap+'</div>';
+      document.getElementById('g-body').innerHTML=html;
+    }
+
+    function toSvg(evt){var p=svg.createSVGPoint();p.x=evt.clientX;p.y=evt.clientY;return p.matrixTransform(svg.getScreenCTM().inverse());}
+
+    function wire(g,n){
+      var drag=null, moved=false;
+      g.addEventListener('pointerenter',function(){if(!drag)edgeHl(n.id);});
+      g.addEventListener('pointerleave',function(){if(!drag)edgeHl(sel);});
+      g.addEventListener('pointerdown',function(evt){evt.preventDefault();try{g.setPointerCapture(evt.pointerId);}catch(e){}var s=toSvg(evt);drag={dx:s.x-n.x,dy:s.y-n.y};moved=false;});
+      g.addEventListener('pointermove',function(evt){if(!drag)return;var s=toSvg(evt);var nx=s.x-drag.dx,ny=s.y-drag.dy;if(Math.abs(nx-n.x)>2||Math.abs(ny-n.y)>2)moved=true;n.x=Math.max(0,Math.min(VW-W,nx));n.y=Math.max(0,Math.min(VH-H,ny));layout();});
+      g.addEventListener('pointerup',function(evt){if(drag){try{g.releasePointerCapture(evt.pointerId);}catch(e){}drag=null;if(!moved)select(n.id);}});
+      g.addEventListener('keydown',function(evt){if(evt.key==='Enter'||evt.key===' '){evt.preventDefault();select(n.id);}});
+    }
+
+    document.getElementById('g-reset').addEventListener('click',build);
+    build();
+  })();
+</script>
+</body></html>
