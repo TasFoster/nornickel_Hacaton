@@ -32,12 +32,27 @@ export interface Source {
   confidence: Confidence;
 }
 
+export interface Recommendations {
+  experts: string[];
+  facilities: string[];
+  similar: string[];
+}
+
+export interface KeyFinding {
+  statement: string;
+  process: string;
+  sources: number;
+}
+
 export interface AnswerData {
   question: string;
   metrics: { sources: number; confidence: string; consensus: number; disputes: number };
   consensus: ConsensusMethod[];
   disputes: Dispute[];
   sources: Source[];
+  findings?: KeyFinding[];
+  gaps?: string[];
+  recommendations?: Recommendations;
 }
 
 export type NodeType =

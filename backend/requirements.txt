@@ -5,6 +5,10 @@ django-cors-headers>=4.4
 neo4j>=5.26
 python-dotenv>=1.0
 
+# --- Продакшн-сервер и раздача статики ---
+gunicorn>=22.0        # WSGI-сервер для деплоя
+whitenoise>=6.6       # раздача собранной статики без отдельного веб-сервера
+
 # --- LLM (провайдер-агностичный слой, knowledge/services/llm/) ---
 openai>=1.40          # OpenAI-совместимый клиент: YandexGPT, self-host (Ollama/vLLM) и т.п.
 pydantic>=2.7         # валидация структурированного вывода извлечения
@@ -13,6 +17,7 @@ requests>=2.31        # Yandex Embeddings (опция)
 # --- Эмбеддинги (семантический поиск, Фаза 2) ---
 # sentence-transformers>=3.0   # локальная модель multilingual-e5 (тянет torch)
 
-# --- Разбор документов корпуса (ingest) ---
-pypdf>=5.0
-python-docx>=1.1
+# --- Разбор документов корпуса (ingest): статьи, отчёты, патенты, справочники ---
+pypdf>=5.0            # PDF (статьи, патенты, отчёты)
+python-docx>=1.1      # DOCX (отчёты, обзоры)
+openpyxl>=3.1         # XLSX (справочники по материалам/оборудованию/единицам); CSV — stdlib

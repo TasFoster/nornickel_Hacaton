@@ -9,34 +9,18 @@ function confPill(c: Confidence): { cls: string; label: string } {
 
 interface Props {
   answer: AnswerData;
-  cypher?: string;
   onShowGraph: () => void;
 }
 
-export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
+export default function SearchAnswer({ answer, onShowGraph }: Props) {
   const ru = answer.sources.filter((s) => s.geo === 'РФ').length;
   const world = answer.sources.length - ru;
-  const empty = answer.consensus.length === 0 && answer.disputes.length === 0 && answer.sources.length === 0;
+  const findings = answer.findings ?? [];
+  const empty = answer.consensus.length === 0 && answer.disputes.length === 0
+    && answer.sources.length === 0 && findings.length === 0;
 
   return (
     <section className="panel on">
-      <div className="filters">
-        <span className="flabel">Фильтры</span>
-        <button className="chip on">Материал: вода <span className="x">×</span></button>
-        <button className="chip on">Процесс: обессоливание <span className="x">×</span></button>
-        <button className="chip geo-ru on">География: Россия <span className="x">×</span></button>
-        <button className="chip">+ Мировая практика</button>
-        <button className="chip on">Годы: 2019–2024 <span className="x">×</span></button>
-        <button className="chip on">Достоверность: высокая+ <span className="x">×</span></button>
-      </div>
-
-      {cypher && (
-        <div className="qcard" style={{ marginBottom: 14 }}>
-          <div className="eyebrow">Сгенерированный запрос (NL → Cypher)</div>
-          <pre style={{ fontFamily: 'var(--data)', fontSize: 12.5, color: 'var(--text)', whiteSpace: 'pre-wrap', margin: 0, overflowX: 'auto' }}>{cypher}</pre>
-        </div>
-      )}
-
       <div className="qcard">
         <div className="eyebrow">Запрос → синтез ответа</div>
         <div className="question">{answer.question}</div>
@@ -48,6 +32,21 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
         </div>
       </div>
 
+      {!!findings.length && (
+        <div className="block ok" style={{ marginBottom: 14 }}>
+          <div className="head"><span className="sev" /><h3>Ключевые выводы по запросу</h3><span className="count">{findings.length}</span></div>
+          <div className="body"><div className="rows">
+            {findings.map((f, fi) => (
+              <div className="mrow" key={fi}>
+                <div className="name" style={{ minWidth: 0 }}>{f.process || 'вывод'}</div>
+                <div className="desc">{f.statement}</div>
+                <div className="badges"><span className="geo">{f.sources} ист.</span></div>
+              </div>
+            ))}
+          </div></div>
+        </div>
+      )}
+
       {empty && (
         <div className="qcard" style={{ borderLeft: '4px solid var(--warn)' }}>
           <div className="eyebrow" style={{ color: 'var(--warn)' }}>Ничего не найдено</div>
@@ -55,7 +54,6 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
             По запросу в графе знаний не нашлось данных. Попробуйте переформулировать: назвать
             материал или процесс (напр. «электроэкстракция никеля», «обессоливание воды»),
             снять слишком узкие условия или убрать ограничение по географии.
-            Сгенерированный Cypher показан выше — по нему видно, что именно искалось.
           </div>
         </div>
       )}
@@ -63,14 +61,14 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
       <div className="block ok">
         <div className="head"><span className="sev" /><h3>Консенсус — применимые методы</h3><span className="count">{answer.consensus.length} метода</span></div>
         <div className="body"><div className="rows">
-          {answer.consensus.map((m) => {
+          {answer.consensus.map((m, mi) => {
             const p = confPill(m.confidence);
             return (
-              <div className="mrow" key={m.name}>
+              <div className="mrow" key={mi}>
                 <div className="name">{m.name}<small>{m.note}</small></div>
                 <div className="desc">{m.desc}
                   <div className="nums">
-                    {m.nums.map((n) => <span className="num" key={n.label}>{n.label}: <b>{n.value}</b></span>)}
+                    {m.nums.map((n, ni) => <span className="num" key={ni}>{n.label}: <b>{n.value}</b></span>)}
                   </div>
                 </div>
                 <div className="badges"><span className={p.cls}>{p.label}</span><span className="geo">{m.sources} ист.</span></div>
@@ -83,8 +81,8 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
       <div className="block warn">
         <div className="head"><span className="sev" /><h3>Зона разногласий</h3><span className="count">{answer.disputes.length} расхождение</span></div>
         <div className="body"><div className="rows">
-          {answer.disputes.map((d) => (
-            <div className="mrow" key={d.name}>
+          {answer.disputes.map((d, di) => (
+            <div className="mrow" key={di}>
               <div className="name">{d.name}<small>{d.note}</small></div>
               <div className="desc">{d.desc}</div>
               <div className="badges"><span className="pill mid dot">Спорно</span><span className="geo">{d.tag}</span></div>
@@ -93,12 +91,21 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
         </div></div>
       </div>
 
+      {!!answer.gaps?.length && (
+        <div className="qcard" style={{ borderLeft: '4px solid var(--warn)', marginBottom: 14 }}>
+          <div className="eyebrow" style={{ color: 'var(--warn)' }}>Пробелы в знаниях</div>
+          <ul style={{ margin: '6px 0 0', paddingLeft: 18, fontSize: 13.5, color: 'var(--slate)', lineHeight: 1.5 }}>
+            {answer.gaps.map((g, gi) => <li key={gi}>{g}</li>)}
+          </ul>
+        </div>
+      )}
+
       <div className="sectlabel">Источники — {answer.sources.length} (Россия: {ru} · Мировая практика: {world})</div>
       <div className="srcgrid">
-        {answer.sources.map((s) => {
+        {answer.sources.map((s, si) => {
           const p = confPill(s.confidence);
           return (
-            <div className="src" key={s.title}>
+            <div className="src" key={si}>
               <span className="kind">{s.kind}</span>
               <span className="ttl">{s.title}</span>
               <div className="meta"><span className="yr">{s.year}</span><span className="geo">{s.geo}</span><span className={p.cls}>{p.label}</span></div>
@@ -106,6 +113,30 @@ export default function SearchAnswer({ answer, cypher, onShowGraph }: Props) {
           );
         })}
       </div>
+
+      {(() => {
+        const r = answer.recommendations;
+        if (!r || (!r.experts.length && !r.facilities.length && !r.similar.length)) return null;
+        const Row = ({ label, items }: { label: string; items: string[] }) =>
+          items.length ? (
+            <div style={{ marginTop: 8 }}>
+              <span style={{ fontSize: 12, color: 'var(--slate)', marginRight: 8 }}>{label}:</span>
+              {items.map((x, i) => (
+                <span key={i} className="pill mid" style={{ marginRight: 6, marginBottom: 4, display: 'inline-block' }}>{x}</span>
+              ))}
+            </div>
+          ) : null;
+        return (
+          <>
+            <div className="sectlabel">Рекомендации</div>
+            <div className="qcard">
+              <Row label="Похожие кейсы" items={r.similar} />
+              <Row label="Связанные лаборатории и предприятия" items={r.facilities} />
+              <Row label="Эксперты" items={r.experts} />
+            </div>
+          </>
+        );
+      })()}
 
       <div className="actions">
         <button className="btn btn-primary" onClick={onShowGraph}>Показать в графе</button>
